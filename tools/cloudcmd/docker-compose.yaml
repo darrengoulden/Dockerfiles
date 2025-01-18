@@ -1,0 +1,35 @@
+# cloudcmd
+# https://hub.docker.com/r/coderaiser/cloudcmd/
+---
+name: cloudcmd
+
+networks:
+  proxy:
+    name: proxy
+    external: True
+
+services:
+  # cloudcmd
+  cloudcmd:
+    container_name: cloudcmd
+    image: coderaiser/cloudcmd
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cloudcmd.rule=Host(`fb.darren.gdn`)"
+      - "traefik.http.routers.cloudcmd.entrypoints=https"
+      - "traefik.http.routers.cloudcmd.tls=true"
+      - "traefik.http.services.cloudcmd.loadbalancer.server.port=8000"
+    networks:
+      proxy:
+        aliases:
+          - cloudcmd
+    volumes:
+      - /mnt/nas/containers/cloudcmd:/root
+      - /:/mnt
+      - /mnt/nas:/nas
+      - /etc/localtime:/etc/localtime:ro
