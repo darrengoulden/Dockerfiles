@@ -1,0 +1,35 @@
+# radarr
+# https://docs.linuxserver.io/images/docker-radarr/
+---
+name: radarr
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+    
+services:
+  # radarr
+  radarr:
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.darren.gdn`)"
+      - "traefik.http.routers.radarr.entrypoints=https"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+    networks:
+      proxy:
+        aliases:
+          - radarr
+    volumes:
+      - /mnt/nas/containers/radarr:/config
+      - /mnt/nas/downloads/movies:/movies
+      - /mnt/nas/downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro
