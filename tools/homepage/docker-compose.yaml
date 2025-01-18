@@ -1,0 +1,36 @@
+# homepage
+# https://gethomepage.dev/
+---
+name: homepage
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # homepage
+  homepage:
+    container_name: homepage
+    image: ghcr.io/gethomepage/homepage:latest
+    restart: unless-stopped
+    environment:
+      PUID: $PUID
+      PGID: $PUID
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.rule=Host(`home.darren.gdn`)"
+      - "traefik.http.routers.homepage.entrypoints=https"
+      - "traefik.http.routers.homepage.tls=true"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+    networks:
+      proxy:
+        aliases:
+          - homepage
+    volumes:
+      - /mnt/nas/downloads/tv:/tv
+      - /mnt/nas/downloads:/downloads
+      - /mnt/nas/containers/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro

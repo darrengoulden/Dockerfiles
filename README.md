@@ -36,5 +36,6 @@ Backup of docker files.
 #### Tools
 
 - [cloudcmd](tools/cloudcmd/ "Web based cloud commander")
+- [homepage](tools/homepage/ "Application dashboard")
 - [microbin](tools/microbin/ "Pastebin")
 - [paperless-ngx](tools/paperless-ngx/ "Document management system")
