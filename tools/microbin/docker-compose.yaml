@@ -6,7 +6,7 @@ name: microbin
 networks:
   proxy:
     name: proxy
-    external: True
+    external: true
 
 services:
   # microbin

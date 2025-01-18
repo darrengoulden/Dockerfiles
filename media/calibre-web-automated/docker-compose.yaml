@@ -6,7 +6,7 @@ name: calibre
 networks:
   proxy:
     name: proxy
-    external: True
+    external: true
 
 services:
   # calibre-web-automated
