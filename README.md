@@ -43,3 +43,4 @@ Backup of docker files.
 - [homepage](tools/homepage/ "Application dashboard")
 - [microbin](tools/microbin/ "Pastebin")
 - [paperless-ngx](tools/paperless-ngx/ "Document management system")
+- [speedtest-tracker](tools/speedtest/ "Internet performance tracking application")

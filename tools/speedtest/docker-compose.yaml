@@ -1,0 +1,37 @@
+# speedtest-tracker
+# https://docs.speedtest-tracker.dev/
+---
+name: speedtest-tracker
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # speedtest-tracker
+  speedtest-tracker:
+    container_name: speedtest-tracker
+    image: lscr.io/linuxserver/speedtest-tracker:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      APP_KEY: base64:.... # echo -n 'base64:'; openssl rand -base64 32;
+      APP_URL: speedtest.darren.gdn
+      DB_CONNECTION: sqlite
+      SPEEDTEST_SCHEDULE: "14 */4 * * *"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.speedtest.rule=Host(`speedtest.darren.gdn`)"
+      - "traefik.http.routers.speedtest.entrypoints=https"
+      - "traefik.http.routers.speedtest.tls=true"
+      - "traefik.http.services.speedtest.loadbalancer.server.port=80"
+    networks:
+      proxy:
+        aliases:
+          - speedtest
+    volumes:
+      - /mnt/nas/containers/speedtest:/config
+      - /etc/localtime:/etc/localtime:ro
