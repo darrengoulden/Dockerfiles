@@ -1,0 +1,35 @@
+# sonarr
+# https://docs.linuxserver.io/images/docker-sonarr/
+---
+name: sonarr
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # sonarr
+  sonarr:
+    container_name: sonarr
+    image: lscr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.darren.gdn`)"
+      - "traefik.http.routers.sonarr.entrypoints=https"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+    networks:
+      proxy:
+        aliases:
+          - sonarr
+    volumes:
+      - /mnt/nas/containers/sonarr:/config
+      - /mnt/nas/downloads/tv:/tv
+      - /mnt/nas/downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro

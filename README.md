@@ -7,8 +7,9 @@ Backup of docker files.
 
 - [bazarr](arr/bazarr "Manages and downloads subtitles")
 - [prowlarr](arr/prowlarr/ "Indexer manager")
-- [radarr](arr/radarr/ "Movie grabber/monitor")
+- [radarr](arr/radarr/ "Movies grabber/monitor")
 - [sabznbd](arr/sabnzbd/ "Automated downloader")
+- [sonarr](arr/sonarr/ "Series grabber/monitor")
 
 #### Authentication
 
