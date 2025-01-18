@@ -6,6 +6,7 @@ Backup of docker files.
 #### Arr...
 
 - [bazarr](arr/bazarr "Manages and downloads subtitles")
+- [prowlarr](arr/prowlarr/ "Indexer manager")
 
 #### Authentication
 

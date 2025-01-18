@@ -1,0 +1,33 @@
+# prowlarr
+# https://docs.linuxserver.io/images/docker-prowlarr/
+---
+name: prowlarr
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+    
+services:
+  # prowlarr
+  prowlarr:
+    container_name: prowlarr
+    image: lscr.io/linuxserver/prowlarr:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.darren.gdn`)"
+      - "traefik.http.routers.prowlarr.entrypoints=https"
+      - "traefik.http.routers.prowlarr.tls=true"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+    networks:
+      proxy:
+        aliases:
+          - prowlarr
+    volumes:
+      - /mnt/nas/containers/prowlarr:/config
+      - /etc/localtime:/etc/localtime:ro
