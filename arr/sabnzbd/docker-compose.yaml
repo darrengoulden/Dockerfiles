@@ -1,0 +1,34 @@
+# sabnzbd
+# https://docs.linuxserver.io/images/docker-sabnzbd/
+---
+name: sabnzbd
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # sabnzbd
+  sabnzbd:
+    container_name: sabnzbd
+    image: lscr.io/linuxserver/sabnzbd:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.darren.gdn`)"
+      - "traefik.http.routers.sabnzbd.entrypoints=https"
+      - "traefik.http.routers.sabnzbd.tls=true"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8081"
+    networks:
+      proxy:
+        aliases:
+          - sabnzbd
+    volumes:
+      - /mnt/nas/containers/sabnzbd:/config
+      - /mnt/nas/downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro
