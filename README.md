@@ -13,6 +13,7 @@ Backup of docker files.
 
 #### Logging
 
+- [dozzle](logging/dozzle/ "Docker log aggregator")
 - [syslog-ng](logging/syslog-ng "Syslog server")
 
 #### Media
@@ -34,5 +35,6 @@ Backup of docker files.
 
 #### Tools
 
+- [cloudcmd](tools/cloudcmd/ "Web based cloud commander")
 - [microbin](tools/microbin/ "Pastebin")
 - [paperless-ngx](tools/paperless-ngx/ "Document management system")

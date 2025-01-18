@@ -1,0 +1,33 @@
+# dozzle
+# https://dozzle.dev/
+---
+name: dozzle
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # dozzle
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dozzle.rule=Host(`dozzle.darren.gdn`)"
+      - "traefik.http.routers.dozzle.entrypoints=https"
+      - "traefik.http.routers.dozzle.tls=true"
+      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+    networks:
+      proxy:
+        aliases:
+          - dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
