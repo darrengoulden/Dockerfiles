@@ -18,8 +18,8 @@ services:
       PUID: 568
       PGID: 568
       TZ: Europe/London
-      MICROBIN_ADMIN_USERNAME: /run/secrets/admin_username
-      MICROBIN_ADMIN_PASSWORD: /run/secrets/admin_password
+      MICROBIN_ADMIN_USERNAME: file:///run/secrets/admin_username
+      MICROBIN_ADMIN_PASSWORD: file:///run/secrets/admin_password
       MICROBIN_EDITABLE: true
       MICROBIN_HIDE_HEADER: false
       MICROBIN_HIDE_FOOTER: true

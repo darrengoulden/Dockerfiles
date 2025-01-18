@@ -17,8 +17,8 @@ Backup of docker files.
 
 #### Media
 
-- [Calibre-Web-Automated](media/calibre-web-automated/ "Calibre-Web but automated and with Calibre features!")
-- [Jellyfin](media/jellyfin/ "Free Software Media System")
+- [calibre-web-automated](media/calibre-web-automated/ "Calibre-Web but automated and with Calibre features!")
+- [jellyfin](media/jellyfin/ "Free Software Media System")
 
 #### Monitoring
 
