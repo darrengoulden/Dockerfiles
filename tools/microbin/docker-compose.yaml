@@ -1,0 +1,76 @@
+# microbin
+# https://github.com/szabodanika/microbin
+---
+name: microbin
+
+networks:
+  proxy:
+    name: proxy
+    external: True
+
+services:
+  # microbin
+  microbin:
+    container_name: bin
+    image: danielszabo99/microbin:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      MICROBIN_ADMIN_USERNAME: /run/secrets/admin_username
+      MICROBIN_ADMIN_PASSWORD: /run/secrets/admin_password
+      MICROBIN_EDITABLE: true
+      MICROBIN_HIDE_HEADER: false
+      MICROBIN_HIDE_FOOTER: true
+      MICROBIN_HIDE_LOGO: true
+      MICROBIN_NO_LISTING: false
+      MICROBIN_HIGHLIGHTSYNTAX: true
+      MICROBIN_PORT: 8080
+      MICROBIN_BIND: 0.0.0.0
+      MICROBIN_PRIVATE: true
+      MICROBIN_PURE_HTML: false
+      MICROBIN_DATA_DIR: microbin_data
+      MICROBIN_JSON_DB: false
+      MICROBIN_READONLY: false
+      MICROBIN_SHOW_READ_STATS: true
+      MICROBIN_THREADS: 1
+      MICROBIN_GC_DAYS: 90
+      MICROBIN_ENABLE_BURN_AFTER: true
+      MICROBIN_DEFAULT_BURN_AFTER: 0
+      MICROBIN_WIDE: false
+      MICROBIN_QR: true
+      MICROBIN_ETERNAL_PASTA: false
+      MICROBIN_ENABLE_READONLY: true
+      MICROBIN_DEFAULT_EXPIRY: never
+      MICROBIN_NO_FILE_UPLOAD: false
+      MICROBIN_HASH_IDS: true
+      MICROBIN_ENCRYPTION_CLIENT_SIDE: true
+      MICROBIN_ENCRYPTION_SERVER_SIDE: true
+      MICROBIN_MAX_FILE_SIZE_ENCRYPTED_MB: 256
+      MICROBIN_MAX_FILE_SIZE_UNENCRYPTED_MB: 2048
+      MICROBIN_DISABLE_UPDATE_CHECKING: false
+      MICROBIN_DISABLE_TELEMETRY: true
+      MICROBIN_LIST_SERVER: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.microbin.rule=Host(`bin.darren.gdn`)"
+      - "traefik.http.routers.microbin.entrypoints=https"
+      - "traefik.http.routers.microbin.tls=true"
+      - "traefik.http.services.microbin.loadbalancer.server.port=8080"
+    networks:
+      proxy:
+        aliases:
+          - microbin
+    volumes:
+      - /mnt/nas/containers/microbin:/app/microbin_data
+      - /etc/localtime:/etc/localtime:ro
+    secrets:
+      - admin_username
+      - admin_password
+
+secrets:
+  admin_username:
+    file: /mnt/nas/secrets/microbin/admin_username
+  admin_password:
+    file: /mnt/nas/secrets/microbin/admin_password

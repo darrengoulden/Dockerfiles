@@ -1,0 +1,23 @@
+# syslog-ng
+# https://docs.linuxserver.io/images/docker-syslog-ng/
+---
+name: syslog
+
+services:
+  syslog:
+    container_name: syslog
+    image: lscr.io/linuxserver/syslog-ng:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      LOG_TO_STDOUT: true
+    ports:
+      - 192.168.1.236:514:5514/udp
+      - 192.168.1.236:601:6601/tcp
+      - 192.168.1.236:6514:6514/tcp
+    volumes:
+      - /mnt/nas/containers/syslog-ng/config:/config
+      - /mnt/nas/containers/syslog-ng/log:/var/log
+      - /etc/localtime:/etc/localtime:ro

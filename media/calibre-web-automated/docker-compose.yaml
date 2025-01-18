@@ -1,0 +1,38 @@
+# calibre-web-automated
+# https://github.com/crocodilestick/Calibre-Web-Automated
+---
+name: calibre
+
+networks:
+  proxy:
+    name: proxy
+    external: True
+
+services:
+  # calibre-web-automated
+  calibre:
+    container_name: calibre
+    image: crocodilestick/calibre-web-automated:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      DOCKER_MODS: lscr.io/linuxserver/mods:universal-calibre-v7.16.0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.calibre.rule=Host(`calibre-web.darren.gdn`)"
+      - "traefik.http.routers.calibre.entrypoints=https"
+      - "traefik.http.routers.calibre.tls=true"
+      - "traefik.http.services.calibre.loadbalancer.server.port=8083"
+    networks:
+      proxy:
+        aliases:
+          - calibre
+    ports:
+      - '8084:8083'
+    volumes:
+      - /mnt/nas/containers/calibre/data:/config
+      - /mnt/nas/containers/calibre/library:/calibre-library
+      - /mnt/nas/downloads/books:/cwa-book-ingest
+      - /etc/localtime:/etc/localtime:ro

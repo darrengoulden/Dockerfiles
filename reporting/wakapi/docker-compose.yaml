@@ -1,0 +1,80 @@
+# wakapi
+# https://github.com/muety/wakapi
+---
+name: wakapi
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+  wakapi:
+    name: wakapi
+    external: false
+
+services:
+  # wakapi
+  wakapp:
+    container_name: wakapp
+    image: n1try/wakapi:latest
+    restart: unless-stopped
+    depends_on:
+      - wakdb
+    environment:
+      - PUID=568
+      - PGID=568
+      - TZ=Europe/London
+      - WAKAPI_INSECURE_COOKIES=true
+      - WAKAPI_DB_TYPE=postgres
+      - WAKAPI_PASSWORD_SALT_FILE=/run/secrets/wakapp_password_salt
+      - WAKAPI_DB_NAME=wakapi
+      - WAKAPI_DB_USER=wakapi
+      - WAKAPI_DB_PASSWORD_FILE=/run/secrets/wakapp_db_password
+      - WAKAPI_DB_HOST=wakdb
+      - WAKAPI_DB_PORT=5432
+      - ENVIRONMENT=prod
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wakapp.rule=Host(`wakapi.darren.gdn`)"
+      - "traefik.http.routers.wakapp.entrypoints=https"
+      - "traefik.http.routers.wakapp.tls=true"
+      - "traefik.http.services.wakapp.loadbalancer.server.port=3000"
+    networks:
+      proxy:
+        aliases:
+          - wakapp
+      wakapi:
+        aliases:
+          - wakapp
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    secrets:
+      - wakapp_password_salt
+      - wakapp_db_password
+
+  # wakapi postgres database
+  wakdb:
+    container_name: wakdb
+    environment:
+      - PUID=568
+      - PGID=568
+      - TZ=Europe/London
+      - POSTGRES_PASSWORD_FILE=/run/secrets/wakapp_db_password
+      - POSTGRES_USER=wakapi
+      - POSTGRES_DB=wakapi
+    image: postgres:16.4
+    networks:
+      wakapi:
+        aliases:
+          - wakdb
+    restart: unless-stopped
+    volumes:
+      - /home/daz/wakapi:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    secrets:
+      - wakapp_db_password
+
+secrets:
+  wakapp_password_salt:
+    file: /mnt/nas/secrets/wakapi/wakapp_password_salt
+  wakapp_db_password:
+    file: /mnt/nas/secrets/wakapi/wakapp_db_password

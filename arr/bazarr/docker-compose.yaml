@@ -1,0 +1,34 @@
+# bazarr
+# https://docs.linuxserver.io/images/docker-bazarr/
+---
+name: bazarr
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # bazarr
+  bazarr:
+    container_name: bazarr
+    image: lscr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.darren.gdn`)"
+      - "traefik.http.routers.bazarr.entrypoints=https"
+      - "traefik.http.routers.bazarr.tls=true"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+    networks:
+      proxy:
+        aliases:
+          - bazarr
+    volumes:
+      - /mnt/nas/containers/bazarr:/config
+      - /mnt/nas/downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro

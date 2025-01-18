@@ -1,0 +1,170 @@
+# Authentik
+# https://docs.goauthentik.io/docs/install-config/install/docker-compose
+---
+name: authentik
+
+networks:
+  authentik:
+    name: authentik
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # postgresql database
+  auth-postgres:
+    container_name: auth-postgres
+    image: docker.io/library/postgres:16
+    restart: unless-stopped
+    environment:
+      PGID: 568
+      TZ: Europe/London
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - /mnt/nas/containers/authentik/pgdata:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      authentik:
+        aliases:
+          - auth-postgres
+    secrets:
+      - postgres_password
+  # redis broker
+  auth-broker:
+    container_name: auth-broker
+    image: docker.io/library/redis:alpine
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    environment:
+      PGID: 568
+      TZ: Europe/London
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - /mnt/nas/containers/authentik/redisdata:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      authentik:
+        aliases:
+          - auth-redis
+  # authentik server
+  auth-server:
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+      auth-broker:
+        condition: service_healthy
+    container_name: auth-server
+    image: ghcr.io/goauthentik/server:latest
+    restart: unless-stopped
+    command: server
+    environment:
+      PGID: 568
+      USERMAP_GID: 568
+      TZ: Europe/London
+      AUTHENTIK_REDIS__HOST: auth-redis
+      AUTHENTIK_POSTGRESQL__HOST: auth-postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/postgres_password
+      AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+      AUTHENTIK_EMAIL__HOST: file:///run/secrets/authentik_email_host
+      AUTHENTIK_EMAIL__PORT: 25
+      AUTHENTIK_EMAIL__FROM: file:///run/secrets/authentik_email_from
+      AUTHENTIK_EMAIL__USERNAME: file:///run/secrets/authentik_email_username
+      AUTHENTIK_EMAIL__PASSWORD: file:///run/secrets/authentik_email_password
+      AUTHENTIK_EMAIL__USE_TLS: True
+      AUTHENTIK_EMAIL__USE_SSL: False
+      AUTHENTIK_EMAIL__TIMEOUT: 10
+    volumes:
+      - /mnt/nas/containers/authentik/media:/media
+      - /mnt/nas/containers/authentik/custom-templates:/templates
+    ports:
+      - 9000
+      - 9443
+    networks:
+      authentik:
+        aliases:
+          - auth-server
+      proxy:
+        aliases:
+          - auth-server
+    secrets:
+      - postgres_password
+      - authentik_secret_key
+      - authentik_email_host
+      - authentik_email_from
+      - authentik_email_username
+      - authentik_email_password
+  # authentik worker
+  worker:
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+      auth-broker:
+        condition: service_healthy
+    container_name: auth-worker
+    image: ghcr.io/goauthentik/server:latest
+    restart: unless-stopped
+    command: worker
+    environment:
+      PGID: 568
+      USERMAP_GID: 568
+      TZ: Europe/London
+      AUTHENTIK_REDIS__HOST: auth-redis
+      AUTHENTIK_POSTGRESQL__HOST: auth-postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/postgres_password
+      AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+      AUTHENTIK_EMAIL__HOST: file:///run/secrets/authentik_email_host
+      AUTHENTIK_EMAIL__PORT: 25
+      AUTHENTIK_EMAIL__FROM: file:///run/secrets/authentik_email_from
+      AUTHENTIK_EMAIL__USERNAME: file:///run/secrets/authentik_email_username
+      AUTHENTIK_EMAIL__PASSWORD: file:///run/secrets/authentik_email_password
+      AUTHENTIK_EMAIL__USE_TLS: True
+      AUTHENTIK_EMAIL__USE_SSL: False
+      AUTHENTIK_EMAIL__TIMEOUT: 10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/nas/containers/authentik/media:/media
+      - /mnt/nas/containers/authentik/certs:/certs
+      - /mnt/nas/containers/authentik/custom-templates:/templates
+    networks:
+      authentik:
+        aliases:
+          - auth-worker
+    secrets:
+      - postgres_password
+      - authentik_secret_key
+      - authentik_email_host
+      - authentik_email_from
+      - authentik_email_username
+      - authentik_email_password
+
+secrets:
+  postgres_password:
+    file: /mnt/nas/secrets/authentik/postgres_password
+  authentik_secret_key:
+    file: /mnt/nas/secrets/authentik/secret_key
+  authentik_email_host:
+    file: /mnt/nas/secrets/authentik/email_host
+  authentik_email_from:
+    file: /mnt/nas/secrets/authentik/email_from
+  authentik_email_username:
+    file: /mnt/nas/secrets/authentik/email_username
+  authentik_email_password:
+    file: /mnt/nas/secrets/authentik/email_password
+    

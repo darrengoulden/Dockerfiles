@@ -1,0 +1,34 @@
+# changedetection
+# https://docs.linuxserver.io/images/docker-changedetection.io/
+---
+name: changedetection
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # changedetection
+  changedetection:
+    container_name: changedetection
+    image: lscr.io/linuxserver/changedetection.io:latest
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      BASE_URL: https://cd.darren.gdn
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.changedetection.rule=Host(`cd.darren.gdn`)"
+      - "traefik.http.routers.changedetection.entrypoints=https"
+      - "traefik.http.routers.changedetection.tls=true"
+      - "traefik.http.services.changedetection.loadbalancer.server.port=5000"
+    networks:
+      proxy:
+        aliases:
+          - changedetection
+    volumes:
+      - /mnt/nas/containers/changedetection:/config
+      - /etc/localtime:/etc/localtime:ro

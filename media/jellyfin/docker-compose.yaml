@@ -1,0 +1,43 @@
+# jellyfin
+# https://github.com/jellyfin/jellyfin
+---
+name: flix
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # jellyfin
+  jellyfin:
+    container_name: jellyfin
+    image: jellyfin/jellyfin
+    restart: unless-stopped
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      JELLYFIN_PublishedServerUrl: https://flix.darren.gdn
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flix.rule=Host(`flix.darren.gdn`)"
+      - "traefik.http.routers.flix.entrypoints=https"
+      - "traefik.http.routers.flix.tls=true"
+      - "traefik.http.services.flix.loadbalancer.server.port=8096"
+    ports:
+      - 192.168.1.236:8096:8096
+      - 192.168.1.236:8920:8920
+      - 192.168.1.236:7359:7359/udp
+      - 192.168.1.236:1900:1900/udp
+    volumes:
+      - /mnt/nas/containers/flix/config:/config
+      - /mnt/nas/containers/flix/cache:/cache
+      - /mnt/nas/downloads/tv:/data/tv
+      - /mnt/nas/downloads/movies:/data/movies
+      - /mnt/nas/downloads/music:/data/music
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      proxy:
+        aliases:
+          - flix

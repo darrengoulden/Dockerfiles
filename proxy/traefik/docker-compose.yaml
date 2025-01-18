@@ -1,0 +1,70 @@
+# traefik
+# https://doc.traefik.io/traefik/getting-started/install-traefik/
+---
+name: traefik
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+
+services:
+  # traefik
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    restart: unless-stopped
+    environment:
+      PGID: 568
+      TZ: Europe/London
+      CF_API_EMAIL_FILE: /run/secrets/cf_api_email
+      CF_API_KEY_FILE: /run/secrets/cf_api_key
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 192.168.1.236:80:80
+      - 192.168.1.236:443:443
+    volumes:
+      - /mnt/nas/containers/traefik/traefik.yml:/traefik.yml:ro
+      - /mnt/nas/containers/traefik/acme.json:/acme.json
+      - /mnt/nas/containers/traefik/config.yml:/config.yml:ro
+      - /mnt/nas/containers/traefik/logs:/var/log/traefik
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      proxy:
+        aliases:
+          - traefik
+    secrets:
+      - cf_api_email
+      - cf_api_key
+      - cf_basicauth
+    labels:
+      - "traefik.enable=true"
+      # HTTP-to-HTTPS Redirect
+      - "traefik.http.routers.http-catchall.entrypoints=http"
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # HTTP Routers
+      - "traefik.http.routers.traefik-rtr.entrypoints=https"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.darren.gdn`)"
+      - "traefik.http.routers.traefik-rtr.tls=true"
+      - "traefik.http.routers.traefik-rtr.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=darren.gdn"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.darren.gdn"
+      - "traefik.http.routers.traefik-rtr.middlewares=auth-middleware,sslheader"
+      ## Services - API
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
+      ## Middlewares
+      - "traefik.http.middlewares.auth-middleware.basicauth.usersfile=/run/secrets/cf_basicauth"
+      - "traefik.http.middlewares.auth-middleware.basicauth.removeheader=false"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+
+secrets:
+  cf_api_email:
+    file: /mnt/nas/secrets/traefik/cf_api_email
+  cf_api_key:
+    file: /mnt/nas/secrets/traefik/cf_api_key
+  cf_basicauth:
+    file: /mnt/nas/secrets/traefik/cf_basicauth
