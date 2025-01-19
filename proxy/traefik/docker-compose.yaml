@@ -27,7 +27,7 @@ services:
     volumes:
       - /mnt/nas/containers/traefik/traefik.yml:/traefik.yml:ro
       - /mnt/nas/containers/traefik/acme.json:/acme.json
-      - /mnt/nas/containers/traefik/config.yml:/config.yml:ro
+      - /mnt/nas/containers/traefik/dynamic_conf:/dynamic_conf:ro
       - /mnt/nas/containers/traefik/logs:/var/log/traefik
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro

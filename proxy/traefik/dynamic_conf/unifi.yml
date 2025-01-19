@@ -1,0 +1,19 @@
+http:
+  routers:
+    unifi:
+      entrypoints: https
+      rule: Host(`unifi.darren.gdn`)
+      service: unifi
+      middlewares:
+        - https-redirect
+      tls: true
+  services:
+    unifi:
+      loadBalancer:
+        servers:
+          - url: "https://cloudkey.darren.gdn"
+        passhostheader: true
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
