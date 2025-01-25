@@ -1,0 +1,87 @@
+# ldap
+# https://github.com/osixia/docker-openldap
+# https://medium.com/@amrutha_20595/setting-up-openldap-server-with-docker-d38781c259b2
+---
+name: ldap
+
+networks:
+  proxy:
+    name: proxy
+    external: true
+  ldap:
+    name: ldap
+
+services:
+  # ldap
+  ldap:
+    container_name: ldap
+    image: osixia/openldap:1.5.0
+    restart: unless-stopped
+    # command: --copy-service --loglevel debug
+    command: --copy-service
+    environment:
+      PUID: 568
+      LDAP_OPENLDAP_UID: 568
+      PGID: 568
+      LDAP_OPENLDAP_GID: 568
+      TZ: Europe/London
+      # https://www.openldap.org/doc/admin24/slapdconf2.html#olcLogLevel:%20%3Clevel%3E
+      LDAP_LOG_LEVEL: 256 # 256 is default
+      LDAP_ORGANISATION: darrengdn
+      LDAP_DOMAIN: darren.gdn
+      LDAP_BASE_DN: 'dc=darren,dc=gdn'
+      LDAP_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+      LDAP_CONFIG_PASSWORD_FILE: /run/secrets/admin_password
+      LDAP_TLS_VERIFY_CLIENT: never
+      LDAP_TLS_CA_CRT_FILENAME: lab_ca.crt
+      LDAP_TLS_CRT_FILENAME: lab_ldap.crt
+      LDAP_TLS_KEY_FILENAME: lab_ldap.key
+      LDAP_TLS_DH_PARAM_FILENAME: lab_ldap.dh
+      LDAP_TLS: true
+    ports:
+        - 192.168.1.236:389:389
+        - 192.168.1.236:636:636
+    volumes:
+      - /mnt/nas/containers/openldap/certs:/container/service/slapd/assets/certs
+      - /mnt/nas/containers/openldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+      #- /mnt/nas/containers/openldap/schema/custom.schema:/container/service/slapd/assets/config/bootstrap/schema/custom.schema
+      - /etc/localtime:/etc/localtime:ro
+    secrets:
+      - admin_password
+    networks:
+      ldap:
+        aliases:
+          - ldap
+  # phpldapadmin
+  # https://github.com/osixia/docker-phpLDAPadmin
+  ldapadmin:
+    container_name: ldapadmin
+    image: osixia/phpldapadmin:latest
+    restart: unless-stopped
+    hostname: ldapadmin
+    depends_on:
+      - ldap
+    environment:
+      PUID: 568
+      PGID: 568
+      TZ: Europe/London
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+      PHPLDAPADMIN_HTTPS: false
+      PHPLDAPADMIN_TRUST_PROXY_SSL: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ldapadmin.rule=Host(`ldap.darren.gdn`)"
+      - "traefik.http.routers.ldapadmin.entrypoints=https"
+      - "traefik.http.routers.ldapadmin.tls=true"
+      - "traefik.http.services.ldapadmin.loadbalancer.server.port=80"
+    networks:
+      proxy:
+        aliases:
+          - ldapadmin
+      ldap:
+        aliases:
+          - ldapadmin
+
+secrets:
+  admin_password:
+    file: /mnt/nas/secrets/ldap/admin_password

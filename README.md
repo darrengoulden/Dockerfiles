@@ -14,6 +14,7 @@ Backup of docker files.
 #### Authentication
 
 - [authentik](auth/authentik/ "Authentication glue")
+- [openldap](auth/openldap/ "OpenLDAP")
 
 #### Logging
 

@@ -1,0 +1,82 @@
+# Add organizational unit "ou=users" under "dc=darren,dc=gdn"
+dn: ou=users,dc=darren,dc=gdn
+changetype: add
+objectClass: organizationalUnit
+objectclass: top
+ou: users
+
+# Add organizational unit "ou=groups" under "dc=darren,dc=gdn"
+dn: ou=groups,dc=darren,dc=gdn
+changetype: add
+objectClass: organizationalUnit
+objectclass: top
+ou: groups
+
+# Create user "data" in "ou=users" under "dc=darren,dc=gdn"
+dn: cn=data,ou=users,dc=darren,dc=gdn
+changetype: add
+cn: data
+objectclass: inetOrgPerson
+objectclass: person
+sn: Data
+uid: data
+userpassword: passwd1
+
+# Create user "picard" in "ou=users" under "dc=darren,dc=gdn"
+dn: cn=picard,ou=users,dc=darren,dc=gdn
+changetype: add
+cn: picard
+objectclass: inetOrgPerson
+objectclass: person
+sn: Picard
+uid: picard
+userpassword: passwd1
+
+# Create user "q" in "ou=users" under "dc=darren,dc=gdn"
+dn: cn=q,ou=users,dc=darren,dc=gdn
+changetype: add
+cn: q
+objectclass: inetOrgPerson
+objectclass: person
+sn: Q
+uid: q
+userpassword: passwd1
+
+# Group: admins
+dn: cn=admins,ou=groups,dc=darren,dc=gdn
+changetype: add
+objectClass: groupOfNames
+cn: admins
+description: Administrators
+member: cn=q,ou=users,dc=darren,dc=gdn
+
+# Group: users
+dn: cn=users,ou=groups,dc=darren,dc=gdn
+changetype: add
+objectClass: groupOfNames
+cn: users
+description: Users
+member: cn=q,ou=users,dc=darren,dc=gdn
+member: cn=data,ou=users,dc=darren,dc=gdn
+member: cn=picard,ou=users,dc=darren,dc=gdn
+
+# Modify and apply MemberOf attribute to Users in Groups.
+dn: cn=q,ou=users,dc=darren,dc=gdn
+changetype: modify
+add: memberOf
+memberOf: cn=admins,ou=groups,dc=darren,dc=gdn
+
+dn: cn=data,ou=users,dc=darren,dc=gdn
+changetype: modify
+add: memberOf
+memberOf: cn=users,ou=groups,dc=darren,dc=gdn
+
+dn: cn=picard,ou=users,dc=darren,dc=gdn
+changetype: modify
+add: memberOf
+memberOf: cn=users,ou=groups,dc=darren,dc=gdn
+
+dn: cn=q,ou=users,dc=darren,dc=gdn
+changetype: modify
+add: memberOf
+memberOf: cn=users,ou=groups,dc=darren,dc=gdn
