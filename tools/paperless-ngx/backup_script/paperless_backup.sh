@@ -47,7 +47,7 @@ if [ $? -eq 0 ]; then
         echo ""
         echo "</pre>"
     ) >> "${logfile}"
-    # Send email
+    # Send email (https://github.com/oxyde1989/standalone-tn-send-email)
     python3 /mnt/nas/folder/scripts/sendmail.py --subject "${subject}" --to_address ${email} --mail_body_html $logfile > /dev/null 2>&1
     #mail -s "${subject}" "${email}"
     rm "${logfile}"
@@ -69,7 +69,7 @@ else
         echo "</pre>"
     ) >> "${logfile}"
     #sendmail -t < "${logfile}"
-    # Send email
+    # Send email (https://github.com/oxyde1989/standalone-tn-send-email)
     python3 /mnt/nas/folder/scripts/sendmail.py --subject "${subject}" --to_address ${email} --mail_body_html $logfile > /dev/null 2>&1
     rm "${logfile}"
 fi

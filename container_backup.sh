@@ -66,6 +66,6 @@ runtime=$((end - start))
     echo ""
     echo "</pre>"
 ) >> "${logfile}"
-# Send email
+# Send email (https://github.com/oxyde1989/standalone-tn-send-email)
 python3 /mnt/folder/scripts/sendmail.py --subject "${subject}" --to_address ${email} --mail_body_html $logfile > /dev/null 2>&1
 rm "${logfile}"
